@@ -1,4 +1,5 @@
-import { insertFirebase, removeFirebase } from '../Utils/firebase.js';
+import { insertFirebase, removeFirebase, searchCurtida_post } from '../Utils/firebase.js';
+import * as Classes from './index.js'
 
 export class Curtida_post {
   constructor() {
@@ -36,6 +37,21 @@ export class Curtida_post {
     curtida_post.ID_Curtida_post = json.ID_Curtida_post;
     curtida_post.ID_Post = json.ID_Post;
     curtida_post.ID_Usuario = json.ID_Usuario;
+    return curtida_post;
+  }
+
+  async extractPost() {
+    const post = await Classes.Post.fromID(this.ID_Post)
+    return post;
+  }
+
+  async extractUsuario() {
+    const user = await Classes.Usuario.fromID(this.ID_Usuario)
+    return user;
+  }
+
+  static async fromID(ID) {
+    const curtida_post = Curtida_post.fromJSON(await searchCurtida_post(ID));
     return curtida_post;
   }
 }

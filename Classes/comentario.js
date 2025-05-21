@@ -1,4 +1,5 @@
-import { insertFirebase, removeFirebase } from '../Utils/firebase.js';
+import { insertFirebase, removeFirebase, searchComentario } from '../Utils/firebase.js';
+import * as Classes from './index.js'
 
 export class Comentario {
   constructor() {
@@ -44,5 +45,19 @@ export class Comentario {
     comentario.Data = json.Data;
     return comentario;
   }
-    
+  
+  async extractPost() {
+    const post = await Classes.Post.fromID(this.ID_post)
+    return post;
+  }
+
+  async extractUsuario() {
+    const user = await Classes.Usuario.fromID(this.ID_usuario)
+    return user;
+  }
+  
+  static async fromID(ID) {
+    const comentario = Comentario.fromJSON(await searchComentario(ID));
+    return comentario;
+  } 
 }

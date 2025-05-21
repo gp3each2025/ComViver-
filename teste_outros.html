@@ -5,7 +5,7 @@
   <title>Inserção no Firebase</title>
 </head>
 <body>
-  <h1>Inserir Nome nigthbehtuoo Firebase</h1>
+  <h1>Inserir Nome  Firebase</h1>
 
   <!-- Botão de envio -->
   <button id="inserirBtn">Inserir</button>
@@ -34,6 +34,7 @@
       document.getElementById("inserirBtn").addEventListener("click", async () => {
         const post = new Classes.Post();
         post.ID_post = 2;
+        post.ID_usuario = 2;
         post.Titulo = "tit";
         post.Texto = "texto";
         post.Icone = "icon";
@@ -42,28 +43,28 @@
         post.insertData();
                 
         const filtro = new Classes.Filtro();
-        filtro.ID_Filtro = 3;
+        filtro.ID_Filtro = 2;
         filtro.Filtro = "filtro";
         filtro.insertData();
           
         const comentario = new Classes.Comentario();
-        comentario.ID_comentario = 5;
-        comentario.ID_post = "id_post";
-        comentario.ID_usuario = "id_usuario"; 
+        comentario.ID_comentario = 2;
+        comentario.ID_post = 2;
+        comentario.ID_usuario = 2; 
         comentario.Texto = "texto";
         comentario.Data = "data"; 
         comentario.insertData();
 
         const curtida_comentario = new Classes.Curtida_comentario();
-        curtida_comentario.ID_Curtida_comentario = 1;
+        curtida_comentario.ID_Curtida_comentario = 2;
         curtida_comentario.ID_Usuario = 2;
-        curtida_comentario.ID_Comentario = 3;
+        curtida_comentario.ID_Comentario = 2;
         curtida_comentario.insertData();
     
         const curtida_post = new Classes.Curtida_post();
-        curtida_post.ID_Curtida_post = 1;
+        curtida_post.ID_Curtida_post = 2;
         curtida_post._ID_Post = 2;
-        curtida_post._ID_Usuario = 3;
+        curtida_post._ID_Usuario = 2;
         curtida_post.insertData();
           
         console.log(`🗑️ Registros preenchidos`);
@@ -73,6 +74,24 @@
         
         const search_post = await Classes.Post.fromID(2);
         console.log("Post encontrado: "+search_post.Texto);
+
+        const search_filtro = await Classes.Filtro.fromID(2);
+        console.log("Filtro encontrado: "+search_filtro.Filtro);
+
+        const search_curtida_post = await Classes.Curtida_post.fromID(2);
+        console.log("Curtida de post encontrado: "+search_curtida_post.ID_Usuario);
+
+        const search_curtida_comentario = await Classes.Curtida_comentario.fromID(2);
+        console.log("Curtida de comentário encontrado: "+search_curtida_comentario.ID_Usuario);
+        console.log("-> " + (await (await search_curtida_comentario.extractComentario()).extractPost()).Texto);
+
+        const search_comentario = await Classes.Comentario.fromID(2);
+        console.log("Comentário encontrado: "+search_comentario.Texto);
+
+        const posts = await Utils.searchPosts();
+        posts.forEach(post => {
+          console.log(post.Texto);
+        });
       });
     </script>
 </body>
