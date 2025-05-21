@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Inserção no Firebase</title>
+</head>
+<body>
+  <h1>Inserir Nome no Firebase</h1>
+
+  <!-- Botão de envio -->
+  <button id="inserirBtn">Inserir</button>
+    
+  <button id="mostrarBtn">Mostrar</button>
+
+  <label for="imagemInput">Selecionar imagem:</label>
+  <input type="file" id="imagemInput" accept="image/*">
+  
+  <!-- Preview da imagem -->
+  <div id="preview"></div>
+
+    <script type="module">
+      import * as Utils from './Utils/index.js';
+      import * as Classes from './Classes/index.js'
+
+      const inputImagem = document.getElementById("imagemInput");
+      const preview = document.getElementById("preview");
+
+      document.getElementById("mostrarBtn").addEventListener("click", async () => {
+        const dadosUsuario = await Utils.searchUsuario(1);
+        const user = Classes.Usuario.fromJSON(dadosUsuario);
+        preview.innerHTML = `<img src="${user.Icone}" width="100">`;
+      });
+
+      document.getElementById("inserirBtn").addEventListener("click", async () => {
+        const post = new Classes.Post();
+        post.ID_post = 2;
+        post.Titulo = "tit";
+        post.Texto = "texto";
+        post.Icone = "icon";
+        post.Foto = "foto";
+        post.Data = "data";
+        post.insertData();
+                
+        const filtro = new Classes.Filtro();
+        filtro.ID_Filtro = 3;
+        filtro.Filtro = "filtro";
+        filtro.insertData();
+          
+        const comentario = new Classes.Comentario();
+        comentario.ID_comentario = 5;
+        comentario.ID_post = "id_post";
+        comentario.ID_usuario = "id_usuario"; 
+        comentario.Texto = "texto";
+        comentario.Data = "data"; 
+        comentario.insertData();
+
+        const curtida_comentario = new Classes.Curtida_comentario();
+        curtida_comentario.ID_Curtida_comentario = 1;
+        curtida_comentario.ID_Usuario = 2;
+        curtida_comentario.ID_Comentario = 3;
+        curtida_comentario.insertData();
+    
+        const curtida_post = new Classes.Curtida_post();
+        curtida_post.ID_Curtida_post = 1;
+        curtida_post._ID_Post = 2;
+        curtida_post._ID_Usuario = 3;
+        curtida_post.insertData();
+          
+        console.log(`🗑️ Registros preenchidos`);
+          
+        const search_user = await Classes.Usuario.fromID(2);
+        console.log("Usuário encontrado: "+search_user.Nome);
+        
+        const search_post = await Classes.Post.fromID(2);
+        console.log("Post encontrado: "+search_post.Texto);
+      });
+    </script>
+</body>
+</html>
