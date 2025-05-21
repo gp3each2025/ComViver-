@@ -156,9 +156,9 @@ export async function searchComentario(id) {
     try {
       const snapshot = await get(child(dbRef, 'Posts'));
       if (snapshot.exists()) {
-        const postsObj = snapshot.val(); // objeto com os posts
+        const postsObj = snapshot.val(); 
         const postsArray = Object.values(postsObj).map(postData => Classes.Post.fromJSON(postData));
-        return postsArray; // retorna um array de instâncias da classe Post
+        return postsArray; 
       } else {
         console.warn("⚠️ Nenhum post encontrado.");
         return [];
@@ -169,4 +169,74 @@ export async function searchComentario(id) {
     }
   }
 
+  export async function searchComentarios() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Comentários'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val();
+        const postsArray = Object.values(postsObj).map(data => Classes.Comentario.fromJSON(data));
+        return postsArray;
+      } else {
+        console.warn("⚠️ Nenhum comentário encontrado.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos os comentários:", error);
+      return [];
+    }
+  }
 
+  export async function searchFiltros() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Filtros'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val(); 
+        const postsArray = Object.values(postsObj).map(data => Classes.Filtro.fromJSON(data));
+        return postsArray; 
+      } else {
+        console.warn("⚠️ Nenhum filtro encontrado.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos os filtros:", error);
+      return [];
+    }
+  }
+
+  export async function searchCurtidas_posts() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Curtidas_posts'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val(); 
+        const postsArray = Object.values(postsObj).map(data => Classes.Curtida_post.fromJSON(data));
+        return postsArray; 
+      } else {
+        console.warn("⚠️ Nenhuma curtida de post encontrada.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos as curtidas de posts:", error);
+      return [];
+    }
+  }
+
+  export async function searchCurtidas_comentarios() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Curtidas_comentarios'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val(); 
+        const postsArray = Object.values(postsObj).map(data => Classes.Curtida_comentario.fromJSON(data));
+        return postsArray; 
+      } else {
+        console.warn("⚠️ Nenhuma curtida de comentário encontrada.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos as curtidas de comentários:", error);
+      return [];
+    }
+  }

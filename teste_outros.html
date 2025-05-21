@@ -44,6 +44,7 @@
                 
         const filtro = new Classes.Filtro();
         filtro.ID_Filtro = 2;
+        filtro.ID_Post = 2;
         filtro.Filtro = "filtro";
         filtro.insertData();
           
@@ -75,6 +76,14 @@
         const search_post = await Classes.Post.fromID(2);
         console.log("Post encontrado: "+search_post.Texto);
 
+        (await search_post.extractComentarios()).forEach(comentario => console.log("-> " + comentario.Texto));
+
+        console.log("Curtidas do post encontradas: "+(await search_post.extractQntCurtidas()))
+
+        const filtros = await search_post.extractFiltros();
+        filtros.forEach(filtro => console.log("-> " + filtro.Filtro));
+
+
         const search_filtro = await Classes.Filtro.fromID(2);
         console.log("Filtro encontrado: "+search_filtro.Filtro);
 
@@ -88,10 +97,20 @@
         const search_comentario = await Classes.Comentario.fromID(2);
         console.log("Comentário encontrado: "+search_comentario.Texto);
 
+        console.log("Número de curtidas do post: "+(await search_comentario.extractQntCurtidas()));
+
         const posts = await Utils.searchPosts();
         posts.forEach(post => {
           console.log(post.Texto);
         });
+
+        const comentarios = await Utils.searchComentarios();
+        comentarios.forEach(comentario => {
+          console.log(comentario.Texto);
+        });
+
+        // console.log("Curtido por usuário: "+search_post.checkCurtidoPor(sear))
+
       });
     </script>
 </body>

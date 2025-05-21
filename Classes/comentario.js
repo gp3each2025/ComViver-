@@ -1,5 +1,6 @@
 import { insertFirebase, removeFirebase, searchComentario } from '../Utils/firebase.js';
 import * as Classes from './index.js'
+import * as Utils from '../Utils/index.js';
 
 export class Comentario {
   constructor() {
@@ -56,6 +57,22 @@ export class Comentario {
     return user;
   }
   
+  async extractQntCurtidas() {
+    return (await this.extractCurtidas()).length;
+  }
+
+  async extractCurtidas() {
+    const curtidas = await Utils.searchCurtidas_comentarios();
+    const arr = [];
+    curtidas.forEach(curtida => {
+      if (curtida.ID_Comentario === this.ID_comentario) {
+        arr.push(curtida);
+      }
+    });
+
+    return arr; 
+  }
+
   static async fromID(ID) {
     const comentario = Comentario.fromJSON(await searchComentario(ID));
     return comentario;

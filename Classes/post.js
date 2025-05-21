@@ -1,5 +1,6 @@
 import { insertFirebase, removeFirebase, searchPost } from '../Utils/firebase.js';
 import * as Classes from './index.js'
+import * as Utils from '../Utils/index.js';
 
 export class Post {
   constructor() {
@@ -56,6 +57,51 @@ export class Post {
     return post;
   }
 
+  async checkCurtidoPor(usuario) {
+    const curtidas = await this.extractCurtidas();
+    return curtidas.some(curtida => curtida.ID_usuario === usuario.ID_usuario);
+  }
+
+  async extractQntCurtidas() {
+    return (await this.extractCurtidas()).length;
+  }
+
+  async extractCurtidas() {
+    const curtidas = await Utils.searchCurtidas_posts();
+    const arr = [];
+    curtidas.forEach(curtida => {
+      if (curtida.ID_Post === this.ID_post) {
+        arr.push(curtida);
+      }
+    });
+
+    return arr; 
+  }
+
+  async extractComentarios() {
+    const comentarios = await Utils.searchComentarios();
+    const arr = [];
+    comentarios.forEach(comentario => {
+      if (comentario.ID_post === this.ID_post) {
+        arr.push(comentario);
+      }
+    });
+
+    return arr; 
+  }
+  
+  async extractFiltros() {
+    const filtros = await Utils.searchFiltros();
+    const arr = [];
+    filtros.forEach(filtro => {
+      if (filtro.ID_Post === this.ID_post) {
+        arr.push(filtro);
+      }
+    });
+
+    return arr; 
+  }
+  
   async extractUsuario() {
     const user = await Classes.Usuario.fromID(this.ID_usuario)
     return user;
