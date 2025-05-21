@@ -1,3 +1,14 @@
+#navbar,
+#mobile_menu,
+#mobile_nav_list,
+.btns_mobile,
+button,
+a {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 header {
     width: 100%;
     padding: 0;
@@ -8,10 +19,6 @@ header {
     z-index: 3;
 }
 
-img {
-
-}
-
 #navbar {
     width: 100%;
     display: flex;
@@ -19,6 +26,10 @@ img {
     align-items: center;
     justify-content: space-between;
     background-color: var(--color-primary-4);
+}
+
+#nav_logo {
+    padding-top: 10px;
 }
 
 #nav_list {
@@ -59,34 +70,66 @@ img {
     display: none;
 }
 
+
 @media screen and (max-width: 1170px) {
+    #navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px; /* espaçamento lateral reduzido para mobile */
+        background-color: var(--color-primary-4);
+    }
+
+    #nav_logo {
+        width: 60px; /* opcional: redimensionar para mobile */
+        height: auto;
+    }
+
     #mobile_btn {
         display: block;
         border: none;
-        background-color: transparent;
-        font-size: 1.5rem;
+        background: transparent;
+        font-size: 1.8rem;
         cursor: pointer;
+        color: white;
     }
 
-    #nav_list, #navbar .btn-default {
+    /* Esconde menu desktop e botões no mobile */
+    #nav_list,
+    .btns {
         display: none;
     }
 
+    /* Menu Mobile (só aparece com classe .active) */
     #mobile_menu.active {
         display: flex;
         flex-direction: column;
         align-items: center;
+        background-color: var(--color-primary-4);
+        padding: 16px;
+        border: none;
+        margin: 0;
+        padding: 0;
     }
 
     #mobile_nav_list {
         display: flex;
         flex-direction: column;
         gap: 12px;
-        margin: 12px 0px; 
+        margin: 12px 0;
+        padding: 0;
+        list-style: none;
     }
 
     #mobile_nav_list .nav-item {
-        list-style: none;
         text-align: center;
+    }
+
+    .btns_mobile {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
     }
 }
