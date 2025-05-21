@@ -1,6 +1,7 @@
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
 import { getDatabase, ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+import * as Classes from '../Classes/index.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyDoOH7VoPD3ro0avIZSkFFzlv7b6Jvtw9w",
@@ -84,5 +85,88 @@ export async function searchPost(id) {
         console.error("❌ Erro ao buscar post:", error);
         return null;
       }
-}
+    }
+
+export async function searchFiltro(id) {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `Filtros/${id}`));
+        if (snapshot.exists()) {
+          return snapshot.val();
+        } else {
+          console.warn(`⚠️ Filtro com ID ${id} não encontrado.`);
+          return null;
+        }
+      } catch (error) {
+        console.error("❌ Erro ao buscar filtro:", error);
+        return null;
+      }
+    }
+
+export async function searchCurtida_post(id) {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `Curtidas_posts/${id}`));
+        if (snapshot.exists()) {
+          return snapshot.val();
+        } else {
+          console.warn(`⚠️ Curtida_post com ID ${id} não encontrado.`);
+          return null;
+        }
+      } catch (error) {
+        console.error("❌ Erro ao buscar curtida_post:", error);
+        return null;
+      }
+    }
+  
+export async function searchCurtida_comentario(id) {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `Curtidas_comentarios/${id}`));
+        if (snapshot.exists()) {
+          return snapshot.val();
+        } else {
+          console.warn(`⚠️ Curtida_comentario com ID ${id} não encontrado.`);
+          return null;
+        }
+      } catch (error) {
+        console.error("❌ Erro ao buscar curtida_comentario:", error);
+        return null;
+      }
+    }
+
+export async function searchComentario(id) {
+    const dbRef = ref(db);
+    try {
+        const snapshot = await get(child(dbRef, `Comentários/${id}`));
+        if (snapshot.exists()) {
+          return snapshot.val();
+        } else {
+          console.warn(`⚠️ Comentário com ID ${id} não encontrado.`);
+          return null;
+        }
+      } catch (error) {
+        console.error("❌ Erro ao buscar comentário:", error);
+        return null;
+      }
+    }
+
+  export async function searchPosts() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Posts'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val(); // objeto com os posts
+        const postsArray = Object.values(postsObj).map(postData => Classes.Post.fromJSON(postData));
+        return postsArray; // retorna um array de instâncias da classe Post
+      } else {
+        console.warn("⚠️ Nenhum post encontrado.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos os posts:", error);
+      return [];
+    }
+  }
+
 

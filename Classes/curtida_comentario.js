@@ -1,4 +1,5 @@
-import { insertFirebase, removeFirebase } from '../Utils/firebase.js';
+import { insertFirebase, removeFirebase, searchCurtida_comentario } from '../Utils/firebase.js';
+import * as Classes from './index.js'
 
 export class Curtida_comentario {
   constructor() {
@@ -36,6 +37,21 @@ export class Curtida_comentario {
     curtida_comentario.ID_Curtida_comentario = json.ID_Curtida_comentario;
     curtida_comentario.ID_Usuario = json.ID_Usuario;
     curtida_comentario.ID_Comentario = json.ID_Comentario;
+    return curtida_comentario;
+  }
+
+  async extractUsuario() {
+    const user = await Classes.Usuario.fromID(this.ID_Usuario)
+    return user;
+  }
+
+  async extractComentario() {
+    const comentario = await Classes.Comentario.fromID(this.ID_Comentario)
+    return comentario;
+  }
+
+  static async fromID(ID) {
+    const curtida_comentario = Curtida_comentario.fromJSON(await searchCurtida_comentario(ID));
     return curtida_comentario;
   }
 }

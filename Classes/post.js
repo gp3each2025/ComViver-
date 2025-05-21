@@ -1,8 +1,10 @@
 import { insertFirebase, removeFirebase, searchPost } from '../Utils/firebase.js';
+import * as Classes from './index.js'
 
 export class Post {
   constructor() {
     this._ID_post = null;
+    this._ID_usuario = null;
     this._Titulo = null;
     this._Texto = null;
     this._Icone = null;
@@ -11,6 +13,7 @@ export class Post {
   }
 
   get ID_post() { return this._ID_post; }
+  get ID_usuario() { return this._ID_usuario; }
   get Titulo() { return this._Titulo; }
   get Texto() { return this._Texto; }
   get Icone() { return this._Icone; }
@@ -18,6 +21,7 @@ export class Post {
   get Data() { return this._Data; }
 
   set ID_post(value) { this._ID_post = value; }
+  set ID_usuario(value) { this._ID_usuario = value; }
   set Titulo(value) { this._Titulo = value; }
   set Texto(value) { this._Texto = value; }
   set Icone(value) { this._Icone = value; }
@@ -27,10 +31,11 @@ export class Post {
   insertData() { insertFirebase(`Posts/${this.ID_post}`, this.toJSON()); }
 
   removeData() { removeFirebase(`Posts/${this.ID_post}`); }
-    
+
   toJSON() {
     return {
       ID_post: this.ID_post,
+      ID_usuario: this.ID_usuario,
       Titulo: this.Titulo,
       Texto: this.Texto,
       Icone: this.Icone,
@@ -42,12 +47,18 @@ export class Post {
   static fromJSON(json) {
     const post = new Post();
     post.ID_post = json.ID_post;
+    post.ID_usuario = json.ID_usuario;
     post.Titulo = json.Titulo;
     post.Texto = json.Texto;
     post.Icone = json.Icone;
     post.Foto = json.Foto;
     post.Data = json.Data;
     return post;
+  }
+
+  async extractUsuario() {
+    const user = await Classes.Usuario.fromID(this.ID_usuario)
+    return user;
   }
     
   static async fromID(ID) {
