@@ -9,6 +9,8 @@
 8. Módulo para inserção de imagem
 9. Como inserir uma imagem base64 no html
 
+IMPORTANTE: Não esqueça de colocar await antes de funções que envolvem acesso ao banco de dados
+
 
 [#1] Como importar as classes e as utilidades:
 import * as Utils from './Utils/index.js'; - Utils.(função)
@@ -44,27 +46,31 @@ const search = await Classes.(classe).fromID((id));
 
 
 [#6] Funções para extração geral do banco de dados
-1. await Utils.searchUsuarios() - extrai todos os usuarios do banco de dados, já como classe
-2. await Utils.searchPosts() - extrai todos os posts do banco de dados, já como classe
-3. await Utils.searchFiltros() - extrai todos os posts do banco de dados, já como classe
-4. await Utils.searchCurtidas_posts() - extrai todos os comentarios do banco de dados, já como classe
-5. await Utils.searchCurtidas_comentarios() - extrai todos os posts do banco de dados, já como classe
-6. await Utils.searchComentarios() - extrai todos os comentarios do banco de dados, já como classe
+1. await Utils.searchUsuarios() - extrai todos os usuarios do banco de dados, já como classes
+2. await Utils.searchPosts() - extrai todos os posts do banco de dados, já como classes
+3. await Utils.searchFiltros() - extrai todos os filtros do banco de dados, já como classes
+4. await Utils.searchCurtidas_posts() - extrai todos as curtidas de posts do banco de dados, já como classes
+5. await Utils.searchCurtidas_comentarios() - extrai todos as curtidas de comentários do banco de dados, já como classes
+6. await Utils.searchComentarios() - extrai todos os comentarios do banco de dados, já como classes
 
 
 [#7] Exemplos úteis
-1 - Como acessar uma classe dentro de outra classe
+1. Como acessar uma classe dentro de outra classe
 console.log("-> " + (await (await search_curtida_comentario.extractComentario()).extractPost()).Texto);
 
-2 - Iterando (encurtado) por uma lista
+2. Iterando (encurtado) por uma lista
 const filtros = await search_post.extractFiltros();
 filtros.forEach(filtro => console.log("-> " + filtro.Filtro));
 
-3 - Iterando (extenso) por uma extração geral
+3. Iterando (extenso) por uma extração geral
 const (posts) = await Utils.searchPosts();
 posts.forEach(post => {
     console.log(post.Texto);
 });
+
+4. Como checar se um post ou comentário foi curtido por um usuário
+console.log("Post curtido por usuário: "+(await search_post.checkCurtidoPor(search_user)))
+console.log("Comentário curtido por usuário: "+(await search_comentario.checkCurtidoPor(search_user)))
 
 
 [#8] Módulo para inserção de imagem
