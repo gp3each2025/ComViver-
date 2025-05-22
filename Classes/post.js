@@ -59,7 +59,7 @@ export class Post {
 
   async checkCurtidoPor(usuario) {
     const curtidas = await this.extractCurtidas();
-    return curtidas.some(curtida => curtida.ID_usuario === usuario.ID_usuario);
+    return curtidas.some(curtida => curtida.ID_Usuario === usuario.ID_usuario);
   }
 
   async extractQntCurtidas() {

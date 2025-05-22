@@ -151,6 +151,24 @@ export async function searchComentario(id) {
       }
     }
 
+  export async function searchUsuarios() {
+    const dbRef = ref(db);
+    try {
+      const snapshot = await get(child(dbRef, 'Usuários'));
+      if (snapshot.exists()) {
+        const postsObj = snapshot.val(); 
+        const postsArray = Object.values(postsObj).map(data => Classes.Usuario.fromJSON(data));
+        return postsArray; 
+      } else {
+        console.warn("⚠️ Nenhum usuário encontrado.");
+        return [];
+      }
+    } catch (error) {
+      console.error("❌ Erro ao buscar todos os usuários:", error);
+      return [];
+    }
+  }
+
   export async function searchPosts() {
     const dbRef = ref(db);
     try {

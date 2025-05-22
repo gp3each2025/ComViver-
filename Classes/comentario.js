@@ -46,6 +46,12 @@ export class Comentario {
     comentario.Data = json.Data;
     return comentario;
   }
+
+  async checkCurtidoPor(usuario) {
+    const curtidas = await this.extractCurtidas();
+    return curtidas.some(curtida => curtida.ID_Usuario === usuario.ID_usuario);
+  }
+
   
   async extractPost() {
     const post = await Classes.Post.fromID(this.ID_post)
@@ -78,3 +84,4 @@ export class Comentario {
     return comentario;
   } 
 }
+

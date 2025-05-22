@@ -109,7 +109,8 @@
           console.log(comentario.Texto);
         });
 
-        // console.log("Curtido por usuário: "+search_post.checkCurtidoPor(sear))
+        console.log("Post curtido por usuário: "+(await search_post.checkCurtidoPor(search_user)))
+        console.log("Comentário curtido por usuário: "+(await search_comentario.checkCurtidoPor(search_user)))
 
       });
     </script>
