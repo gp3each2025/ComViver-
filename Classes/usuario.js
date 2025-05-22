@@ -1,4 +1,4 @@
-import { insertFirebase, removeFirebase, searchUsuario } from '../Utils/firebase.js';
+import { insertFirebase, removeFirebase, searchUsuario, searchUsuarioByEmail } from '../Utils/firebase.js';
 
 export class Usuario {
   constructor() {
@@ -10,6 +10,7 @@ export class Usuario {
     this._Casa_repouso = false;
     this._Endereco = null;
     this._Icone = null;
+    this._Senha = null;
   }
 
   get ID_usuario() { return this._ID_usuario; }
@@ -20,7 +21,9 @@ export class Usuario {
   get Casa_repouso() { return this._Casa_repouso; }
   get Endereco() { return this._Endereco; }
   get Icone() { return this._Icone; }
+  get Senha() { return this._Senha; }
 
+  
   set ID_usuario(value) { this._ID_usuario = value; }
   set Nascimento(value) { this._Nascimento = value; }
   set Nome(value) { this._Nome = value; }
@@ -29,7 +32,9 @@ export class Usuario {
   set Casa_repouso(value) { this._Casa_repouso = value; }
   set Endereco(value) { this._Endereco = value; }
   set Icone(value) { this._Icone = value; }
+  set Senha(value) { this._Senha = value; }
 
+  
   insertData() { insertFirebase(`Usuários/${this._ID_usuario}`, this.toJSON()); }
 
   removeData() { removeFirebase(`Usuários/${this._ID_usuario}`); }    
@@ -43,7 +48,8 @@ export class Usuario {
       Senha: this.Senha,
       Casa_repouso: this.Casa_repouso,
       Endereco: this.Endereco,
-      Icone: this.Icone
+      Icone: this.Icone,
+      Senha: this.Senha
     };
   }
 
@@ -57,11 +63,23 @@ export class Usuario {
     user.Casa_repouso = json.Casa_repouso;
     user.Endereco = json.Endereco;
     user.Icone = json.Icone;
+    user.Senha = json.Senha;
     return user;
   }
     
   static async fromID(ID) {
     const user = Usuario.fromJSON(await searchUsuario(ID));
     return user;
+  }
+
+  static async login(email, senha) {
+    const usuario = await searchUsuarioByEmail(email);
+    if (!usuario) return null;
+
+    if (usuario.Senha === senha) {
+      const user = Usuario.fromJSON(usuario);
+      return user;
+    }
+    return null;
   }
 }

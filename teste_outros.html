@@ -112,6 +112,9 @@
         console.log("Post curtido por usuário: "+(await search_post.checkCurtidoPor(search_user)))
         console.log("Comentário curtido por usuário: "+(await search_comentario.checkCurtidoPor(search_user)))
 
+        const nuser = await Classes.Usuario.login("alexandre@email.com", "123");
+        if(nuser != null) console.log("Usuário logado com sucesso!")
+        else console.log("Senha ou email inválidos")
       });
     </script>
 </body>

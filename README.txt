@@ -5,7 +5,12 @@
 4. Funções comuns a todas as classes
 5. Funções para extração de classes
 6. Funções para extração geral do banco de dados
-7. Exemplos úteis
+7. Exemplos úteis 
+    7.1 Classe dentro de classe
+    7.2 Iterando uma lista
+    7.3 Iterando uma extração geral
+    7.4 Como checar se um post ou comentário foi curtido por um usuário
+    7.5 Como fazer login em um usuário
 8. Módulo para inserção de imagem
 9. Como inserir uma imagem base64 no html
 
@@ -35,7 +40,7 @@ const search = await Classes.(classe).fromID((id));
 5. await fromID() - procura uma classe no banco de dados pelo ID
 
 
-[#5] Funções para extração de classes:
+[#5] Funções para extração dentro de classes:
 1. await extractPost() - se a classe possui ID_Post, retorna a classe post respectiva
 2. await extractUsuario() - se a classe possui ID_Usuario, retorna a classe usuario respectiva
 3. await extractComentario() - se a classe possui ID_Comentario, retorna a classe comentario respectiva
@@ -45,13 +50,22 @@ const search = await Classes.(classe).fromID((id));
 7. await extractFiltros() - extrai a lista de filtros, apenas na classe post
 
 
-[#6] Funções para extração geral do banco de dados
+[#6] Funções para extração no banco de dados
 1. await Utils.searchUsuarios() - extrai todos os usuarios do banco de dados, já como classes
 2. await Utils.searchPosts() - extrai todos os posts do banco de dados, já como classes
 3. await Utils.searchFiltros() - extrai todos os filtros do banco de dados, já como classes
 4. await Utils.searchCurtidas_posts() - extrai todos as curtidas de posts do banco de dados, já como classes
 5. await Utils.searchCurtidas_comentarios() - extrai todos as curtidas de comentários do banco de dados, já como classes
 6. await Utils.searchComentarios() - extrai todos os comentarios do banco de dados, já como classes
+
+7. await Utils.searchUsuario(id) - procura um usuário com base no ID
+8. await Utils.searchPost(id) - procura um post com base no ID
+9. await Utils.searchFiltro(id) - procura um filtro com base no ID
+10. await Utils.searchCurtida_post(id) - procura a curtida de um post com base no ID
+11. await Utils.searchCurtida_comentario(id) - procura a curtida de um comentário com base no ID
+12. await Utils.searchComentario(id) - procura um comentário com base no ID
+
+13. await Utils.searchUsuarioByEmail(email) - procura um usuário com base no email
 
 
 [#7] Exemplos úteis
@@ -71,6 +85,11 @@ posts.forEach(post => {
 4. Como checar se um post ou comentário foi curtido por um usuário
 console.log("Post curtido por usuário: "+(await search_post.checkCurtidoPor(search_user)))
 console.log("Comentário curtido por usuário: "+(await search_comentario.checkCurtidoPor(search_user)))
+
+5. Como fazer login em um usuário
+const nuser = await Classes.Usuario.login("alexandre@email.com", "123");
+if(nuser != null) console.log("Usuário logado com sucesso!")
+else console.log("Senha ou email inválidos")
 
 
 [#8] Módulo para inserção de imagem

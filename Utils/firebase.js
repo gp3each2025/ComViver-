@@ -71,6 +71,11 @@ export async function searchUsuario(id) {
       }
 }
 
+export async function searchUsuarioByEmail(email) {
+  const usuarios = await searchUsuarios();
+  return usuarios.find(usuario => usuario.Email === email) || null;
+}
+
 export async function searchPost(id) {
     const dbRef = ref(db);
     try {
