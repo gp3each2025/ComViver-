@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog com Firebase Refatorado</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .action-button {
+      @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-150 ease-in-out transform hover:scale-105;
+    }
+    .secondary-button {
+      @apply bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-150 ease-in-out transform hover:scale-105;
+    }
+    .destructive-button {
+      @apply bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-150 ease-in-out transform hover:scale-105;
+    }
+    .destructive-button-sm {
+      @apply bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-2 rounded-md shadow-sm transition-all duration-150 ease-in-out transform hover:scale-105;
+    }
+    .card {
+      @apply bg-white p-6 rounded-xl shadow-lg mb-6;
+    }
+    .input-field {
+      @apply mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
+        focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+        disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
+        invalid:border-pink-500 invalid:text-pink-600
+        focus:invalid:border-pink-500 focus:invalid:ring-pink-500;
+    }
+    label {
+      @apply block text-sm font-medium text-slate-700 mb-1;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-4 md:p-8">
+
+  <div class="max-w-2xl mx-auto">
+    <header class="mb-10 text-center">
+      <h1 class="text-4xl font-bold text-sky-600">Blog Interativo com Firebase</h1>
+      <p class="text-slate-600 mt-2">Demonstração das novas classes e funcionalidades.</p>
+    </header>
+
+    <div class="card">
+      <h2 class="text-2xl font-semibold mb-4 text-sky-500">Autenticação e Perfil</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="emailInput">Email:</label>
+          <input type="email" id="emailInput" class="input-field" placeholder="seu@email.com" value="teste@exemplo.com">
+        </div>
+        <div>
+          <label for="senhaInput">Senha:</label>
+          <input type="password" id="senhaInput" class="input-field" placeholder="Sua Senha" value="123456">
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button id="registrarBtn" class="action-button">Registrar Usuário</button>
+        <button id="loginBtn" class="action-button">Login</button>
+        <button id="logoutBtn" class="destructive-button">Logout</button>
+      </div>
+      <div id="authStatus" class="text-sm text-slate-600 mb-4">Status: Não autenticado.</div>
+
+      <h3 class="text-xl font-semibold mb-2 text-sky-500">Dados do Perfil</h3>
+      <div>
+        <label for="nomeUsuarioInput">Nome do Usuário:</label>
+        <input type="text" id="nomeUsuarioInput" class="input-field mb-2" placeholder="Seu Nome">
+      </div>
+      <div>
+        <label for="iconeUploadInput">Ícone do Usuário (URL ou Base64):</label>
+        <input type="file" id="iconeUploadInput" accept="image/*" class="input-field mb-2">
+        <img id="iconePreview" src="https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone" alt="Preview do Ícone" class="w-24 h-24 rounded-full object-cover border border-slate-300 mb-2">
+        <input type="hidden" id="iconeBase64Input"> </div>
+      <button id="salvarPerfilBtn" class="secondary-button mb-4">Salvar Perfil</button>
+      <button id="mostrarPerfilBtn" class="secondary-button">Carregar Perfil</button>
+      <div id="perfilInfo" class="mt-4 p-4 bg-slate-50 rounded-lg">
+        <h4 class="font-semibold">Informações do Perfil Carregado:</h4>
+        <p id="perfilNome" class="text-slate-700"></p>
+        <img id="perfilIconeDisplay" src="https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone" alt="Ícone do Perfil" class="w-20 h-20 rounded-full object-cover mt-2 border border-slate-300">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="text-2xl font-semibold mb-4 text-sky-500">Posts</h2>
+      <div>
+        <label for="postTituloInput">Título do Post:</label>
+        <input type="text" id="postTituloInput" class="input-field mb-2" placeholder="Título Incrível">
+      </div>
+      <div>
+        <label for="postTextoInput">Texto do Post:</label>
+        <textarea id="postTextoInput" class="input-field mb-2" rows="3" placeholder="Conteúdo do seu post..."></textarea>
+      </div>
+      <button id="criarPostBtn" class="action-button mb-4">Criar Post</button>
+
+      <h3 class="text-xl font-semibold mb-2 text-sky-500">Posts Existentes</h3>
+      <button id="carregarPostsBtn" class="secondary-button mb-4">Carregar Todos os Posts</button>
+      <div id="listaPosts" class="space-y-4">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="text-2xl font-semibold mb-4 text-sky-500">Log de Ações</h2>
+        <pre id="logOutput" class="bg-slate-800 text-slate-200 p-4 rounded-lg text-xs overflow-x-auto h-64"></pre>
+    </div>
+
+  </div>
+  
+  <div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center hidden">
+    <div class="bg-white p-5 rounded-lg shadow-xl w-full max-w-md mx-auto">
+      <h3 class="text-lg font-medium leading-6 text-gray-900" id="confirmModalTitle">Confirmar Ação</h3>
+      <div class="mt-2">
+        <p class="text-sm text-gray-500" id="confirmModalMessage">Você tem certeza?</p>
+      </div>
+      <div class="mt-4 flex justify-end space-x-3">
+        <button id="confirmModalCancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+        <button id="confirmModalConfirm" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module">
+    // Importar tudo de Utils e Classes (assumindo que Utils/index.js e Classes/index.js exportam tudo)
+    import * as Utils from './Utils/index.js';
+    import * as Classes from './Classes/index.js';
+
+    // Referências aos Elementos do DOM
+    const emailInput = document.getElementById("emailInput");
+    const senhaInput = document.getElementById("senhaInput");
+    const registrarBtn = document.getElementById("registrarBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const authStatus = document.getElementById("authStatus");
+
+    const nomeUsuarioInput = document.getElementById("nomeUsuarioInput");
+    const iconeUploadInput = document.getElementById("iconeUploadInput");
+    const iconePreview = document.getElementById("iconePreview");
+    const iconeBase64Input = document.getElementById("iconeBase64Input");
+    const salvarPerfilBtn = document.getElementById("salvarPerfilBtn");
+    const mostrarPerfilBtn = document.getElementById("mostrarPerfilBtn");
+    const perfilInfo = document.getElementById("perfilInfo");
+    const perfilNome = document.getElementById("perfilNome");
+    const perfilIconeDisplay = document.getElementById("perfilIconeDisplay");
+
+    const postTituloInput = document.getElementById("postTituloInput");
+    const postTextoInput = document.getElementById("postTextoInput");
+    const criarPostBtn = document.getElementById("criarPostBtn");
+    const carregarPostsBtn = document.getElementById("carregarPostsBtn");
+    const listaPosts = document.getElementById("listaPosts");
+    const logOutput = document.getElementById("logOutput");
+
+    // Modal de confirmação
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmModalTitle = document.getElementById('confirmModalTitle');
+    const confirmModalMessage = document.getElementById('confirmModalMessage');
+    const confirmModalCancel = document.getElementById('confirmModalCancel');
+    const confirmModalConfirm = document.getElementById('confirmModalConfirm');
+    let confirmAction = null;
+
+
+    let currentUser = null; // Para armazenar o usuário autenticado do Firebase
+
+    // --- FUNÇÕES DE LOG ---
+    function log(message) {
+      console.log(message);
+      logOutput.textContent += `[${new Date().toLocaleTimeString()}] ${typeof message === 'object' ? JSON.stringify(message, null, 2) : message}\n`;
+      logOutput.scrollTop = logOutput.scrollHeight; // Auto-scroll
+    }
+
+    function logError(message, error) {
+      console.error(message, error);
+      logOutput.textContent += `[${new Date().toLocaleTimeString()}] ERRO: ${message} - ${error.message || error}\n`;
+      if (error.stack && typeof error.stack === 'string') { // Check if error.stack exists and is a string
+        logOutput.textContent += `${error.stack}\n`;
+      }
+      logOutput.scrollTop = logOutput.scrollHeight;
+    }
+    
+    // --- FUNÇÃO PARA MODAL DE CONFIRMAÇÃO ---
+    function showConfirmModal(title, message, onConfirm) {
+        confirmModalTitle.textContent = title;
+        confirmModalMessage.textContent = message;
+        confirmAction = onConfirm; // Armazena a ação a ser executada
+        confirmModal.classList.remove('hidden');
+    }
+
+    confirmModalCancel.addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+        confirmAction = null;
+    });
+
+    confirmModalConfirm.addEventListener('click', async () => {
+        if (confirmAction) {
+            try {
+                await confirmAction();
+            } catch (error) {
+                logError("Erro ao executar ação confirmada:", error);
+            }
+        }
+        confirmModal.classList.add('hidden');
+        confirmAction = null;
+    });
+
+
+    // --- OBSERVAR ESTADO DE AUTENTICAÇÃO ---
+    Utils.observeAuthState(user => {
+      if (user) {
+        currentUser = user;
+        authStatus.textContent = `Status: Autenticado como ${user.email} (UID: ${user.uid})`;
+        log(`Usuário autenticado: ${user.email}`);
+        carregarPerfilDoUsuarioAutenticado();
+        carregarTodosOsPosts(); // Carregar posts após login
+      } else {
+        currentUser = null;
+        authStatus.textContent = "Status: Não autenticado.";
+        log("Nenhum usuário autenticado.");
+        nomeUsuarioInput.value = '';
+        iconeBase64Input.value = '';
+        iconePreview.src = 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+        perfilNome.textContent = '';
+        perfilIconeDisplay.src = 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+        listaPosts.innerHTML = '<p class="text-slate-600">Faça login para ver os posts.</p>'; // Limpar posts
+      }
+    });
+
+    // --- MANIPULADOR DE UPLOAD DE ÍCONE ---
+    iconeUploadInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        try {
+          const base64 = await Utils.imagemParaBase64(file);
+          iconeBase64Input.value = base64;
+          iconePreview.src = base64;
+          log("Ícone convertido para Base64 e preview atualizado.");
+        } catch (error) {
+          logError("Erro ao converter imagem para Base64:", error);
+          iconeBase64Input.value = '';
+          iconePreview.src = 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Erro';
+        }
+      }
+    });
+
+    // --- FUNÇÕES DE AUTENTICAÇÃO E PERFIL ---
+    registrarBtn.addEventListener("click", async () => {
+      const email = emailInput.value;
+      const senha = senhaInput.value;
+      if (!email || !senha) {
+        logError("Email e senha são obrigatórios para registrar.");
+        return;
+      }
+      try {
+        const userCredential = await Utils.registerUser(email, senha);
+        log(`Usuário registrado: ${userCredential.user.email}`);
+      } catch (error) {
+        logError("Erro ao registrar usuário:", error);
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const email = emailInput.value;
+      const senha = senhaInput.value;
+       if (!email || !senha) {
+        logError("Email e senha são obrigatórios para login.");
+        return;
+      }
+      try {
+        const userCredential = await Utils.loginUser(email, senha);
+        log(`Usuário logado: ${userCredential.user.email}`);
+      } catch (error) {
+        logError("Erro ao logar usuário:", error);
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await Utils.logoutUser();
+        log("Usuário deslogado com sucesso.");
+      } catch (error) {
+        logError("Erro ao deslogar usuário:", error);
+      }
+    });
+
+    salvarPerfilBtn.addEventListener("click", async () => {
+      if (!currentUser) {
+        logError("Nenhum usuário autenticado para salvar o perfil.");
+        return;
+      }
+      const nome = nomeUsuarioInput.value;
+      const icone = iconeBase64Input.value; 
+
+      if (!nome) {
+          logError("O nome do usuário é obrigatório para salvar o perfil.");
+          return;
+      }
+
+      try {
+        const perfil = new Classes.Usuario();
+        perfil.ID_usuario = currentUser.uid;
+        perfil.Nome = nome;
+        perfil.Email = currentUser.email; 
+        if (icone) perfil.Icone = icone;
+
+        await perfil.saveProfileData();
+        log(`Perfil do usuário ${currentUser.uid} salvo com sucesso.`);
+        
+        perfilNome.textContent = `Nome: ${perfil.Nome}`;
+        perfilIconeDisplay.src = perfil.Icone || 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+
+      } catch (error) {
+        logError("Erro ao salvar perfil:", error);
+      }
+    });
+
+    async function carregarPerfilDoUsuarioAutenticado() {
+        if (!currentUser) {
+            // log("Nenhum usuário autenticado para carregar o perfil."); // Já logado pelo observeAuthState
+            return;
+        }
+        try {
+            const perfil = await Classes.Usuario.loadProfile(currentUser.uid);
+            if (perfil) {
+                log(`Perfil de ${currentUser.uid} carregado:`, perfil.toJSON());
+                nomeUsuarioInput.value = perfil.Nome || '';
+                
+                iconeBase64Input.value = perfil.Icone || '';
+                iconePreview.src = perfil.Icone || 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+                perfilNome.textContent = `Nome: ${perfil.Nome}`;
+                perfilIconeDisplay.src = perfil.Icone || 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+            } else {
+                log(`Nenhum perfil encontrado para ${currentUser.uid}. Crie um novo.`);
+                nomeUsuarioInput.value = '';
+                iconeBase64Input.value = '';
+                iconePreview.src = 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+                perfilNome.textContent = 'Nenhum perfil encontrado.';
+                perfilIconeDisplay.src = 'https://placehold.co/100x100/E2E8F0/94A3B8?text=Icone';
+            }
+        } catch (error) {
+            logError(`Erro ao carregar perfil de ${currentUser.uid}:`, error);
+        }
+    }
+    mostrarPerfilBtn.addEventListener("click", carregarPerfilDoUsuarioAutenticado);
+
+
+    // --- FUNÇÕES DE POST ---
+    criarPostBtn.addEventListener("click", async () => {
+      if (!currentUser) {
+        logError("Usuário precisa estar logado para criar um post.");
+        return;
+      }
+      const titulo = postTituloInput.value;
+      const texto = postTextoInput.value;
+
+      if (!titulo || !texto) {
+        logError("Título e texto são obrigatórios para o post.");
+        return;
+      }
+
+      try {
+        const post = new Classes.Post();
+        
+        post.Titulo = titulo;
+        post.Texto = texto;
+
+        post._Filtros = { "tecnologia": true, "novidade": true };
+        log("Filtros definidos para o post:", post._Filtros);
+
+        await post.insertData(); 
+        log(`Post "${post.Titulo}" (ID: ${post.ID_post}) criado com sucesso por ${post.ID_usuario}.`);
+
+        // const comentarioAdicionado = await post.adicionarComentario("Este é um comentário de exemplo!");
+        // log(`Comentário (ID: ${comentarioAdicionado.ID_comentario}) adicionado ao post ${post.ID_post}.`);
+
+        // await post.curtir(); 
+        // log(`Post ${post.ID_post} curtido. Total de curtidas: ${post.qntCurtidas}`);
+        // log("Quem curtiu o post:", post.Curtidas);
+
+        // const comentarioNoPost = post.Comentarios[comentarioAdicionado.ID_comentario];
+        // if (comentarioNoPost) {
+        //     await comentarioNoPost.curtir(); 
+        //     log(`Comentário ${comentarioNoPost.ID_comentario} curtido. Total de curtidas: ${comentarioNoPost.qntCurtidas}`);
+        //     log(`Quem curtiu o comentário ${comentarioNoPost.ID_comentario}:`, comentarioNoPost.Curtidas);
+        // }
+
+        postTituloInput.value = '';
+        postTextoInput.value = '';
+        await carregarTodosOsPosts(); 
+
+      } catch (error) {
+        logError("Erro ao criar post ou interagir com ele:", error);
+      }
+    });
+
+    async function carregarTodosOsPosts() {
+        if (!currentUser && !Utils.getCurrentUser()) { // Checa novamente se há usuário, pode ter deslogado
+             listaPosts.innerHTML = '<p class="text-slate-600">Faça login para ver os posts.</p>';
+             return;
+        }
+        try {
+            const posts = await Utils.searchPosts();
+            listaPosts.innerHTML = ''; 
+            if (posts && posts.length > 0) {
+                log(`Carregados ${posts.length} posts.`);
+                posts.sort((a, b) => new Date(b.Data) - new Date(a.Data)); 
+
+                posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.className = 'p-4 bg-slate-50 rounded-lg shadow mb-3';
+                    
+                    let deletePostButtonHTML = '';
+                    if (currentUser && currentUser.uid === post.ID_usuario) {
+                        deletePostButtonHTML = `
+                            <button data-post-id="${post.ID_post}" class="excluirPostBtn destructive-button-sm ml-2">
+                                Excluir Post
+                            </button>`;
+                    }
+
+                    postElement.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="text-lg font-semibold text-sky-700">${post.Titulo} (ID: ${post.ID_post})</h4>
+                                <p class="text-sm text-slate-600">Por: ${post.ID_usuario} em ${new Date(post.Data).toLocaleString()}</p>
+                            </div>
+                            ${deletePostButtonHTML}
+                        </div>
+                        <p class="mt-1 text-slate-800">${post.Texto}</p>
+                        <p class="text-xs mt-1 text-slate-500">Curtidas: ${post.qntCurtidas} | Comentários: ${post.qntComentarios}</p>
+                        <div class="mt-2">
+                            <button data-post-id="${post.ID_post}" class="curtirPostBtn text-xs ${post.checkCurtidoPor(currentUser?.uid) ? 'bg-pink-500 hover:bg-pink-600' : 'bg-blue-500 hover:bg-blue-600'} text-white py-1 px-2 rounded">
+                                ${post.checkCurtidoPor(currentUser?.uid) ? 'Descurtir' : 'Curtir'} Post
+                            </button>
+                        </div>
+                        <div class="mt-2 space-y-1 text-xs" id="comentarios-${post.ID_post}">
+                            <h5 class="font-semibold mt-3">Comentários:</h5>
+                            ${Object.values(post.Comentarios).map(com => {
+                                let deleteCommentButtonHTML = '';
+                                if (currentUser && (currentUser.uid === com.ID_usuario || currentUser.uid === post.ID_usuario)) {
+                                    deleteCommentButtonHTML = `
+                                        <button data-post-id="${post.ID_post}" data-comentario-id="${com.ID_comentario}" class="excluirComentarioBtn destructive-button-sm ml-2">
+                                            Excluir
+                                        </button>`;
+                                }
+                                return `
+                                <div class="bg-slate-200 p-2 rounded mt-1">
+                                    <div class="flex justify-between items-start">
+                                        <p><strong>${com.ID_usuario}:</strong> ${com.Texto}</p>
+                                        ${deleteCommentButtonHTML}
+                                    </div>
+                                    <p class="text-slate-500 text-xs mt-1">Curtidas: ${com.qntCurtidas}
+                                        <button data-post-id="${post.ID_post}" data-comentario-id="${com.ID_comentario}" class="curtirComentarioBtn ml-2 text-xs ${com.checkCurtidoPor(currentUser?.uid) ? 'bg-pink-500 hover:bg-pink-600' : 'bg-teal-500 hover:bg-teal-600'} text-white py-0.5 px-1.5 rounded">
+                                            ${com.checkCurtidoPor(currentUser?.uid) ? 'Descurtir' : 'Curtir'}
+                                        </button>
+                                    </p>
+                                </div>`;
+                            }).join('') || '<p class="text-slate-500">Nenhum comentário.</p>'}
+                        </div>
+                        <div class="mt-2">
+                            <input type="text" id="novoComentarioInput-${post.ID_post}" class="input-field input-field-sm text-xs" placeholder="Adicionar comentário...">
+                            <button data-post-id="${post.ID_post}" class="adicionarComentarioBtn secondary-button text-xs py-1 px-2 mt-1">Comentar</button>
+                        </div>
+                    `;
+                    listaPosts.appendChild(postElement);
+                });
+                adicionarEventListenersDinamicos();
+            } else {
+                listaPosts.innerHTML = '<p class="text-slate-600">Nenhum post encontrado ou você não está logado.</p>';
+                log("Nenhum post para exibir.");
+            }
+        } catch (error) {
+            logError("Erro ao carregar posts:", error);
+            listaPosts.innerHTML = '<p class="text-red-500">Erro ao carregar posts.</p>';
+        }
+    }
+    carregarPostsBtn.addEventListener("click", carregarTodosOsPosts);
+
+    function adicionarEventListenersDinamicos() {
+        document.querySelectorAll('.curtirPostBtn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentUser) { logError("Faça login para curtir."); return; }
+                const postId = e.target.dataset.postId;
+                try {
+                    const post = await Classes.Post.fromID(postId);
+                    if (post) {
+                        await post.curtir(); 
+                        log(`Interação de curtida no post ${postId}. Novas curtidas: ${post.qntCurtidas}`);
+                        await carregarTodosOsPosts();
+                    }
+                } catch (error) {
+                    logError(`Erro ao curtir/descurtir post ${postId}:`, error);
+                }
+            });
+        });
+
+        document.querySelectorAll('.curtirComentarioBtn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentUser) { logError("Faça login para curtir comentários."); return; }
+                const postId = e.target.dataset.postId;
+                const comentarioId = e.target.dataset.comentarioId;
+                try {
+                    const post = await Classes.Post.fromID(postId);
+                    if (post && post.Comentarios[comentarioId]) {
+                        const comentario = post.Comentarios[comentarioId];
+                        await comentario.curtir(); 
+                        log(`Interação de curtida no comentário ${comentarioId} do post ${postId}. Novas curtidas: ${comentario.qntCurtidas}`);
+                        await carregarTodosOsPosts();
+                    }
+                } catch (error) {
+                    logError(`Erro ao curtir/descurtir comentário ${comentarioId}:`, error);
+                }
+            });
+        });
+
+        document.querySelectorAll('.adicionarComentarioBtn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentUser) { logError("Faça login para comentar."); return; }
+                const postId = e.target.dataset.postId;
+                const inputComentario = document.getElementById(`novoComentarioInput-${postId}`);
+                const textoComentario = inputComentario.value;
+                if (!textoComentario.trim()) { logError("O texto do comentário não pode ser vazio."); return; }
+
+                try {
+                    const post = await Classes.Post.fromID(postId);
+                    if (post) {
+                        await post.adicionarComentario(textoComentario);
+                        log(`Comentário adicionado ao post ${postId}.`);
+                        inputComentario.value = '';
+                        await carregarTodosOsPosts(); 
+                    }
+                } catch (error) {
+                    logError(`Erro ao adicionar comentário ao post ${postId}:`, error);
+                }
+            });
+        });
+
+        // Event Listeners para Excluir Post
+        document.querySelectorAll('.excluirPostBtn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentUser) { logError("Faça login para excluir posts."); return; }
+                const postId = e.target.dataset.postId;
+                
+                showConfirmModal(
+                    "Excluir Post",
+                    `Tem certeza que deseja excluir o post ID: ${postId}? Esta ação não pode ser desfeita.`,
+                    async () => {
+                        try {
+                            const post = await Classes.Post.fromID(postId);
+                            if (post) {
+                                if (post.ID_usuario === currentUser.uid) { // Dupla checagem de segurança
+                                    await post.removeData();
+                                    log(`Post ${postId} excluído com sucesso.`);
+                                    await carregarTodosOsPosts();
+                                } else {
+                                    logError("Não autorizado a excluir este post (verificação do lado do cliente).");
+                                }
+                            }
+                        } catch (error) {
+                            logError(`Erro ao excluir post ${postId}:`, error);
+                        }
+                    }
+                );
+            });
+        });
+
+        // Event Listeners para Excluir Comentário
+        document.querySelectorAll('.excluirComentarioBtn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                if (!currentUser) { logError("Faça login para excluir comentários."); return; }
+                const postId = e.target.dataset.postId;
+                const comentarioId = e.target.dataset.comentarioId;
+
+                showConfirmModal(
+                    "Excluir Comentário",
+                    `Tem certeza que deseja excluir o comentário ID: ${comentarioId} do post ID: ${postId}?`,
+                    async () => {
+                        try {
+                            const post = await Classes.Post.fromID(postId);
+                            if (post && post.Comentarios[comentarioId]) {
+                                const comentario = post.Comentarios[comentarioId];
+                                // Permissão: Dono do post ou dono do comentário
+                                if (currentUser.uid === comentario.ID_usuario || currentUser.uid === post.ID_usuario) {
+                                    await post.removerComentario(comentarioId); // Método da classe Post
+                                    log(`Comentário ${comentarioId} do post ${postId} excluído com sucesso.`);
+                                    await carregarTodosOsPosts();
+                                } else {
+                                    logError("Não autorizado a excluir este comentário (verificação do lado do cliente).");
+                                }
+                            }
+                        } catch (error) {
+                            logError(`Erro ao excluir comentário ${comentarioId} do post ${postId}:`, error);
+                        }
+                    }
+                );
+            });
+        });
+    }
+    
+    // Carregar posts ao iniciar se houver usuário logado
+    if(Utils.getCurrentUser()){
+        carregarTodosOsPosts();
+    } else {
+        listaPosts.innerHTML = '<p class="text-slate-600">Faça login para ver os posts.</p>';
+    }
+
+
+    log("Página e scripts carregados. Aguardando interação do usuário.");
+    log("Lembre-se de configurar suas credenciais do Firebase em Utils/firebase.js e as Regras de Segurança no console do Firebase.");
+
+  </script>
+</body>
+</html>

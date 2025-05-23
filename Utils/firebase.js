@@ -1,8 +1,16 @@
-// firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-import { getDatabase, ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
-import * as Classes from '../Classes/index.js'
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
 
+import { getDatabase, ref, get, child, set, remove, query, orderByChild } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+import * as Classes from '../Classes/index.js';
+
+// Cole sua firebaseConfig aqui
 const firebaseConfig = {
   apiKey: "AIzaSyDoOH7VoPD3ro0avIZSkFFzlv7b6Jvtw9w",
   authDomain: "grupo3rp-66e17.firebaseapp.com",
@@ -15,251 +23,119 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🔎 Função para buscar dados
-export async function buscarDadosTabela(tabela) {
-  const dbRef = ref(db);
+// --- FUNÇÕES DE AUTENTICAÇÃO ---
+export const registerUser = (email, password) => {
+  return createUserWithEmailAndPassword(auth, email, password);
+};
+
+export const loginUser = (email, password) => {
+  return signInWithEmailAndPassword(auth, email, password);
+};
+
+export const logoutUser = () => {
+  return signOut(auth);
+};
+
+export const observeAuthState = (callback) => {
+  return onAuthStateChanged(auth, callback);
+};
+
+export const getCurrentUser = () => {
+  return auth.currentUser;
+};
+
+// --- CONSTANTES PARA CAMINHOS ---
+export const FIREBASE_PATHS = {
+  USUARIOS: 'Usuários',
+  POSTS: 'Posts',
+  getUsuarioPath: (userId) => `${FIREBASE_PATHS.USUARIOS}/${userId}`,
+  getPostPath: (postId) => `${FIREBASE_PATHS.POSTS}/${postId}`,
+  getComentariosPostPath: (postId) => `${FIREBASE_PATHS.POSTS}/${postId}/Comentarios`,
+  getComentarioPath: (postId, comentarioId) => `${FIREBASE_PATHS.POSTS}/${postId}/Comentarios/${comentarioId}`,
+  getCurtidasPostPath: (postId) => `${FIREBASE_PATHS.POSTS}/${postId}/Curtidas`,
+  getCurtidaUsuarioPostPath: (postId, userId) => `${FIREBASE_PATHS.POSTS}/${postId}/Curtidas/${userId}`,
+  getCurtidasComentarioPath: (postId, comentarioId) => `${FIREBASE_PATHS.POSTS}/${postId}/Comentarios/${comentarioId}/Curtidas`,
+  getCurtidaUsuarioComentarioPath: (postId, comentarioId, userId) => `${FIREBASE_PATHS.POSTS}/${postId}/Comentarios/${comentarioId}/Curtidas/${userId}`,
+  getFiltrosPostPath: (postId) => `${FIREBASE_PATHS.POSTS}/${postId}/Filtros`,
+};
+
+// --- FUNÇÕES DE DADOS ---
+export async function insertFirebase(path, value) {
+  const caminhoRef = ref(db, path);
   try {
-    const snapshot = await get(child(dbRef, tabela));
+    await set(caminhoRef, value);
+    console.log(`✅ Valor inserido com sucesso em ${path}`);
+  } catch (error) {
+    console.error(`❌ Erro ao inserir dados em ${path}:`, error);
+    throw error;
+  }
+}
+
+export async function removeFirebase(path) {
+  const caminhoRef = ref(db, path);
+  try {
+    await remove(caminhoRef);
+    console.log(`🗑️ Registro removido com sucesso de ${path}`);
+  } catch (error) {
+    console.error(`❌ Erro ao remover dados de ${path}:`, error);
+    throw error;
+  }
+}
+
+// Busca dados do perfil de um usuário
+export async function searchUsuario(userId) {
+  const userPath = FIREBASE_PATHS.getUsuarioPath(userId);
+  try {
+    const snapshot = await get(ref(db, userPath));
     if (snapshot.exists()) {
       return snapshot.val();
     } else {
+      console.warn(`⚠️ Perfil de usuário com ID ${userId} não encontrado em ${userPath}.`);
       return null;
     }
   } catch (error) {
-    console.error("Erro ao buscar dados:", error);
-    return null;
+    console.error(`❌ Erro ao buscar perfil de usuário ${userId}:`, error);
+    throw error;
   }
 }
 
-// ✅ Função para inserir dados
-export async function insertFirebase(campo, valor) {
-  const caminhoRef = ref(db, campo);
+// Busca dados de um post específico
+export async function searchPost(postId) {
+  const postPath = FIREBASE_PATHS.getPostPath(postId);
   try {
-    await set(caminhoRef, valor);
-    console.log(`✅ Valor inserido com sucesso em ${campo}`);
+    const snapshot = await get(ref(db, postPath));
+    if (snapshot.exists()) {
+      return snapshot.val(); // Retorna o objeto completo do post
+    } else {
+      console.warn(`⚠️ Post com ID ${postId} não encontrado.`);
+      return null;
+    }
   } catch (error) {
-    console.error("❌ Erro ao inserir dados:", error);
+    console.error(`❌ Erro ao buscar post ${postId}:`, error);
+    throw error;
   }
-
 }
 
-export async function removeFirebase(campo) {
-  const caminhoRef = ref(db, campo);
+// Busca todos os posts (considerar paginação para grandes volumes)
+export async function searchPosts() {
   try {
-    await remove(caminhoRef);
-    console.log(`🗑️ Registro removido com sucesso de ${campo}`);
+    const postsRef = ref(db, FIREBASE_PATHS.POSTS);
+    const snapshot = await get(postsRef); 
+
+    if (snapshot.exists()) {
+      const postsObj = snapshot.val();
+      return Object.entries(postsObj).map(([id, postData]) =>
+        Classes.Post.fromJSON({ ...postData, ID_post: id }) // Garante que o ID_post está no objeto
+      );
+    } else {
+      console.warn("⚠️ Nenhum post encontrado.");
+      return [];
+    }
   } catch (error) {
-    console.error("❌ Erro ao remover dados:", error);
+    console.error("❌ Erro ao buscar todos os posts:", error);
+    throw error;
   }
 }
-    
-export async function searchUsuario(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Usuários/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val(); 
-        } else {
-          console.warn(`⚠️ Usuário com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar usuário:", error);
-        return null;
-      }
-}
-
-export async function searchUsuarioByEmail(email) {
-  const usuarios = await searchUsuarios();
-  return usuarios.find(usuario => usuario.Email === email) || null;
-}
-
-export async function searchPost(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Posts/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          console.warn(`⚠️ Post com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar post:", error);
-        return null;
-      }
-    }
-
-export async function searchFiltro(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Filtros/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          console.warn(`⚠️ Filtro com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar filtro:", error);
-        return null;
-      }
-    }
-
-export async function searchCurtida_post(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Curtidas_posts/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          console.warn(`⚠️ Curtida_post com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar curtida_post:", error);
-        return null;
-      }
-    }
-  
-export async function searchCurtida_comentario(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Curtidas_comentarios/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          console.warn(`⚠️ Curtida_comentario com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar curtida_comentario:", error);
-        return null;
-      }
-    }
-
-export async function searchComentario(id) {
-    const dbRef = ref(db);
-    try {
-        const snapshot = await get(child(dbRef, `Comentários/${id}`));
-        if (snapshot.exists()) {
-          return snapshot.val();
-        } else {
-          console.warn(`⚠️ Comentário com ID ${id} não encontrado.`);
-          return null;
-        }
-      } catch (error) {
-        console.error("❌ Erro ao buscar comentário:", error);
-        return null;
-      }
-    }
-
-  export async function searchUsuarios() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Usuários'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val(); 
-        const postsArray = Object.values(postsObj).map(data => Classes.Usuario.fromJSON(data));
-        return postsArray; 
-      } else {
-        console.warn("⚠️ Nenhum usuário encontrado.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos os usuários:", error);
-      return [];
-    }
-  }
-
-  export async function searchPosts() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Posts'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val(); 
-        const postsArray = Object.values(postsObj).map(postData => Classes.Post.fromJSON(postData));
-        return postsArray; 
-      } else {
-        console.warn("⚠️ Nenhum post encontrado.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos os posts:", error);
-      return [];
-    }
-  }
-
-  export async function searchComentarios() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Comentários'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val();
-        const postsArray = Object.values(postsObj).map(data => Classes.Comentario.fromJSON(data));
-        return postsArray;
-      } else {
-        console.warn("⚠️ Nenhum comentário encontrado.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos os comentários:", error);
-      return [];
-    }
-  }
-
-  export async function searchFiltros() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Filtros'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val(); 
-        const postsArray = Object.values(postsObj).map(data => Classes.Filtro.fromJSON(data));
-        return postsArray; 
-      } else {
-        console.warn("⚠️ Nenhum filtro encontrado.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos os filtros:", error);
-      return [];
-    }
-  }
-
-  export async function searchCurtidas_posts() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Curtidas_posts'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val(); 
-        const postsArray = Object.values(postsObj).map(data => Classes.Curtida_post.fromJSON(data));
-        return postsArray; 
-      } else {
-        console.warn("⚠️ Nenhuma curtida de post encontrada.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos as curtidas de posts:", error);
-      return [];
-    }
-  }
-
-  export async function searchCurtidas_comentarios() {
-    const dbRef = ref(db);
-    try {
-      const snapshot = await get(child(dbRef, 'Curtidas_comentarios'));
-      if (snapshot.exists()) {
-        const postsObj = snapshot.val(); 
-        const postsArray = Object.values(postsObj).map(data => Classes.Curtida_comentario.fromJSON(data));
-        return postsArray; 
-      } else {
-        console.warn("⚠️ Nenhuma curtida de comentário encontrada.");
-        return [];
-      }
-    } catch (error) {
-      console.error("❌ Erro ao buscar todos as curtidas de comentários:", error);
-      return [];
-    }
-  }

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastre-se - Escolha o Tipo de Conta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #4A5568; /* Cor de fundo principal (azul acinzentado escuro) */
+        }
+        .header-bg {
+            background-color: #2D3748; /* Azul acinzentado um pouco mais escuro para o header */
+        }
+        .main-content-bg {
+            background-color: #F7FAFC; /* Bege bem claro para o card de cadastro */
+            min-height: calc(100vh - 80px - 64px); /* Altura da tela menos header e footer */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 10%; /* Espaço para a "onda" ou apenas para afastar do footer */
+        }
+        .footer-bg {
+            background-color: #1A202C; /* Cor bem escura para o footer */
+        }
+        .btn-nav {
+            transition: background-color 0.3s ease;
+        }
+        .btn-nav:hover {
+            background-color: #4A5568; /* Um pouco mais claro ao passar o mouse */
+        }
+        .btn-nav.active {
+            background-color: #3182CE; /* Azul para o botão ativo */
+            color: white;
+        }
+        .btn-nav.login {
+             background-color: #718096; /* Cinza para o botão Entrar */
+        }
+        .card-option {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Simulação da onda no rodapé com gradiente, pode ser substituído por SVG */
+        .wave-footer-bg {
+            position: relative;
+            background-color: #4A5568; /* Cor de fundo principal */
+        }
+        .wave-footer-bg::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* Altura da onda */
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23F7FAFC' fill-opacity='1' d='M0,192L80,176C160,160,320,128,480,133.3C640,139,800,181,960,186.7C1120,192,1280,160,1360,144L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom center;
+            background-size: cover;
+            z-index: 0;
+        }
+        .content-above-wave {
+            position: relative;
+            z-index: 1;
+        }
+
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <header class="header-bg shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <a href="#" class="text-white text-2xl font-bold">
+                    <img src="https://placehold.co/100x40/FFFFFF/2D3748?text=LOGO" alt="Logo do Site" class="h-10 rounded">
+                </a>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="#" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium btn-nav">HOME</a>
+                <a href="#" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium btn-nav">BLOG</a>
+                <a href="#" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium btn-nav">SOBRE</a>
+                <a href="login.html" class="text-white px-4 py-2 rounded-md text-sm font-semibold btn-nav login">ENTRAR</a>
+                <a href="#" class="text-white px-4 py-2 rounded-md text-sm font-semibold btn-nav active">CADASTRE-SE</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="flex-grow wave-footer-bg">
+        <div class="main-content-bg content-above-wave pt-12">
+            <div class="bg-white p-8 md:p-12 rounded-xl shadow-2xl w-full max-w-xl text-center mx-4">
+                <h1 class="text-xl text-gray-600 font-semibold mb-8 tracking-wider">CADASTRAR COMO</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
+                    <a href="signup.html?tipo=casa_repouso"
+                       class="card-option bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-10 flex flex-col items-center justify-center text-gray-700 hover:text-blue-600">
+                        <span class="text-lg font-semibold">Casa de Repouso</span>
+                    </a>
+
+                    <a href="signup.html?tipo=usuario_comum"  class="card-option bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-lg p-8 md:p-10 flex flex-col items-center justify-center text-gray-700 hover:text-green-600">
+                        <span class="text-lg font-semibold">Usuário comum</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="login.html" class="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                        Já possui conta?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer-bg text-white text-center py-5 z-10 relative">
+        <p>&copy; EACH USP</p>
+    </footer>
+
+</body>
+</html>

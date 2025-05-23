@@ -1,43 +1,71 @@
-import { insertFirebase, removeFirebase, searchUsuario, searchUsuarioByEmail } from '../Utils/firebase.js';
+// Classes/usuario.js
+import { FIREBASE_PATHS, insertFirebase, removeFirebase, searchUsuario as searchUserProfile } from '../Utils/firebase.js';
 
 export class Usuario {
   constructor() {
-    this._ID_usuario = null;
+    this._ID_usuario = null; // Será o uid do Firebase Auth
     this._Nascimento = null;
     this._Nome = null;
-    this._Email = null;
-    this._Senha = null;
+    this._Email = null; // Email do perfil (pode ser o mesmo do auth)
     this._Casa_repouso = false;
     this._Endereco = null;
-    this._Icone = null;
-    this._Senha = null;
+    this._Icone = null; // URL ou Base64 da imagem do ícone
   }
 
   get ID_usuario() { return this._ID_usuario; }
   get Nascimento() { return this._Nascimento; }
   get Nome() { return this._Nome; }
   get Email() { return this._Email; }
-  get Senha() { return this._Senha; }
   get Casa_repouso() { return this._Casa_repouso; }
   get Endereco() { return this._Endereco; }
   get Icone() { return this._Icone; }
-  get Senha() { return this._Senha; }
 
-  
-  set ID_usuario(value) { this._ID_usuario = value; }
-  set Nascimento(value) { this._Nascimento = value; }
-  set Nome(value) { this._Nome = value; }
-  set Email(value) { this._Email = value; }
-  set Senha(value) { this._Senha = value; }
-  set Casa_repouso(value) { this._Casa_repouso = value; }
-  set Endereco(value) { this._Endereco = value; }
-  set Icone(value) { this._Icone = value; }
-  set Senha(value) { this._Senha = value; }
+  set ID_usuario(value) {
+    if (!value) throw new Error("ID do usuário não pode ser nulo ou vazio.");
+    this._ID_usuario = value;
+  }
+  set Nascimento(value) {
+    this._Nascimento = value;
+  }
+  set Nome(value) {
+    if (typeof value !== 'string' || value.trim() === '') {
+      throw new Error("Nome inválido.");
+    }
+    this._Nome = value.trim();
+  }
+  set Email(value) {
+    if (typeof value !== 'string' || !value.includes('@')) { // Validação simples
+        throw new Error("Email inválido.");
+    }
+    this._Email = value.trim();
+  }
+  set Casa_repouso(value) {
+    this._Casa_repouso = typeof value === 'boolean' ? value : false;
+  }
+  set Endereco(value) {
+    this._Endereco = value;
+  }
+  set Icone(value) {
+    this._Icone = value;
+  }
 
-  
-  insertData() { insertFirebase(`Usuários/${this._ID_usuario}`, this.toJSON()); }
+  async saveProfileData() {
+    if (!this.ID_usuario) {
+      console.error("❌ ID_usuario não definido. Não é possível salvar o perfil.");
+      throw new Error("ID do usuário é obrigatório para salvar o perfil.");
+    }
+    const profileData = this.toJSON();
+    await insertFirebase(FIREBASE_PATHS.getUsuarioPath(this.ID_usuario), profileData);
+  }
 
-  removeData() { removeFirebase(`Usuários/${this._ID_usuario}`); }    
+  async removeProfileData() {
+    if (!this.ID_usuario) {
+      console.error("❌ ID_usuario não definido. Não é possível remover o perfil.");
+      throw new Error("ID do usuário é obrigatório para remover o perfil.");
+    }
+    // Para remover a conta de autenticação: user.delete()
+    await removeFirebase(FIREBASE_PATHS.getUsuarioPath(this.ID_usuario));
+  }
 
   toJSON() {
     return {
@@ -45,11 +73,9 @@ export class Usuario {
       Nascimento: this.Nascimento,
       Nome: this.Nome,
       Email: this.Email,
-      Senha: this.Senha,
       Casa_repouso: this.Casa_repouso,
       Endereco: this.Endereco,
       Icone: this.Icone,
-      Senha: this.Senha
     };
   }
 
@@ -59,26 +85,17 @@ export class Usuario {
     user.Nascimento = json.Nascimento;
     user.Nome = json.Nome;
     user.Email = json.Email;
-    user.Senha = json.Senha;
-    user.Casa_repouso = json.Casa_repouso;
+    user.Casa_repouso = json.Casa_repouso === undefined ? false : json.Casa_repouso;
     user.Endereco = json.Endereco;
     user.Icone = json.Icone;
-    user.Senha = json.Senha;
-    return user;
-  }
-    
-  static async fromID(ID) {
-    const user = Usuario.fromJSON(await searchUsuario(ID));
     return user;
   }
 
-  static async login(email, senha) {
-    const usuario = await searchUsuarioByEmail(email);
-    if (!usuario) return null;
-
-    if (usuario.Senha === senha) {
-      const user = Usuario.fromJSON(usuario);
-      return user;
+  static async loadProfile(userId) {
+    if (!userId) throw new Error("UserID é necessário para carregar o perfil.");
+    const userData = await searchUserProfile(userId);
+    if (userData) {
+      return Usuario.fromJSON({ ...userData, ID_usuario: userId });
     }
     return null;
   }
